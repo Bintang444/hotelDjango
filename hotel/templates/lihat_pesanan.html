@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pesanan Saya</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        ul {
+            max-width: 600px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            line-height: 1.6;
+            position: relative;
+        }
+        strong {
+            color: #007BFF;
+        }
+        a.btn {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: white;
+            background-color: #dc3545;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+        a.btn:hover {
+            background-color: #c82333;
+        }
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            padding: 10px 20px;
+            border-radius: 5px;
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+        p {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Pesanan Saya</h1>
+
+{% if bookings %}
+    <ul>
+        {% for booking in bookings %}
+            <li>
+                Kamar: {{ booking.kamar.nama }} <br>
+                Check-in: {{ booking.check_in }} <br>
+                Check-out: {{ booking.check_out }} <br>
+                Status: <strong>{{ booking.status }}</strong> <br>
+                {% if booking.status == "Pending" %}
+                    <a href="{% url 'hotel:cancel_booking' booking.id %}" class="btn" onclick="return confirm('Yakin mau batalkan booking?')">Batalkan</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Belum ada pesanan.</p>
+{% endif %}
+
+<a href="{% url 'hotel:homepage' %}" class="back-btn">Kembali ke Beranda</a>
+
+</body>
+</html>

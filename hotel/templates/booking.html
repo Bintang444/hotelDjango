@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Kamar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      color: green;
+    }
+
+    .btn-booking {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-booking:hover {
+            background: #45a049;
+        }
+  </style>
+</head>
+<body>
+    {% load humanize %}
+  <div class="container">
+    <h2>Booking Kamar: {{ kamar.nama }}</h2>
+    <p>Harga per malam: <strong>Rp{{ kamar.harga|intcomma }}</strong></p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <input type="text" name="nama_pelanggan" placeholder="Nama Lengkap" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="text" name="alamat" placeholder="Alamat" required>
+
+      <label for="check_in">Tanggal Check-in:</label>
+      <input type="date" id="check_in" name="check_in" required>
+
+      <label for="check_out">Tanggal Check-out:</label>
+      <input type="date" id="check_out" name="check_out" required>
+
+      <p class="total">Total: <span id="totalHarga">Rp0</span></p>
+
+      <button type="submit" class="btn-booking">Booking Sekarang</button>
+      <a href="{% url 'hotel:homepage' %}" class="btn-booking">Kembali</a>
+    </form>
+  </div>
+
+  <script>
+    const hargaPerMalam = parseFloat("{{ kamar.harga|floatformat:0 }}");
+    const checkIn = document.getElementById('check_in');
+    const checkOut = document.getElementById('check_out');
+    const totalHarga = document.getElementById('totalHarga');
+
+    // Set minimum tanggal check-in ke hari ini
+    const today = new Date().toISOString().split('T')[0];
+    checkIn.min = today;
+    checkOut.min = today;
+
+    function hitungTotal() {
+      const tglMasuk = new Date(checkIn.value);
+      const tglKeluar = new Date(checkOut.value);
+      const selisihHari = (tglKeluar - tglMasuk) / (1000 * 60 * 60 * 24);
+
+      if (selisihHari > 0) {
+        const total = selisihHari * hargaPerMalam;
+        totalHarga.innerText = 'Rp' + total.toLocaleString();
+      } else {
+        totalHarga.innerText = 'Rp0';
+      }
+    }
+
+    checkIn.addEventListener('change', () => {
+      checkOut.min = checkIn.value;
+      hitungTotal();
+    });
+
+    checkOut.addEventListener('change', hitungTotal);
+  </script>
+</body>
+</html>
