@@ -68,22 +68,30 @@
     </style>
 </head>
 <body>
+{% load humanize %}
 
 <h1>Pesanan Saya</h1>
 
 {% if bookings %}
     <ul>
         {% for booking in bookings %}
-            <li>
-                Kamar: {{ booking.kamar.nama }} <br>
-                Check-in: {{ booking.check_in }} <br>
-                Check-out: {{ booking.check_out }} <br>
-                Status: <strong>{{ booking.status }}</strong> <br>
-                {% if booking.status == "Pending" %}
-                    <a href="{% url 'hotel:cancel_booking' booking.id %}" class="btn" onclick="return confirm('Yakin mau batalkan booking?')">Batalkan</a>
-                {% endif %}
-            </li>
-        {% endfor %}
+    <li>
+        Kamar: {{ booking.kamar.nama }} <br>
+        Check-in: {{ booking.check_in }} <br>
+        Check-out: {{ booking.check_out }} <br>
+        Total Harga: Rp {{ booking.total_harga|floatformat:0|intcomma }} <br>
+        Status: <strong>{{ booking.status }}</strong> <br>
+
+        {% if booking.status == "Pending" %}
+            <a href="{% url 'hotel:cancel_booking' booking.id %}" class="btn" onclick="return confirm('Yakin mau batalkan booking?')">Batalkan</a>
+        {% endif %}
+
+        {% if booking.status == "Confirmed" %}
+            <a href="{% url 'hotel:invoice' booking.id %}" class="btn" style="background-color: #28a745;">Cetak Bukti (PDF)</a>
+        {% endif %}
+    </li>
+{% endfor %}
+
     </ul>
 {% else %}
     <p>Belum ada pesanan.</p>

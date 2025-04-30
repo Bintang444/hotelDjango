@@ -98,3 +98,22 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('hotel:homepage')
+
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa # type: ignore
+
+def cetak_invoice(request, booking_id):
+    from hotel.models import Booking  # atau sesuaikan
+    booking = Booking.objects.get(id=booking_id)
+    template = get_template('invoice_template.html')
+    html = template.render({'booking': booking})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="invoice_{booking_id}.pdf"'
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Gagal buat PDF')
+    return response
+
+
