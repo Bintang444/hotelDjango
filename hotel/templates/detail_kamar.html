@@ -53,6 +53,17 @@
  {% endif %}
  <p><strong>Harga:</strong> Rp{{ kamar.harga|intcomma }}</p>
  <p>{{ kamar.deskripsi }}</p>
+
+ {% if kamar.fasilitas %}
+    <h3>Fasilitas:</h3>
+    <ul>
+        {% for fasilitas in kamar.fasilitas.splitlines %}
+            <li>{{ fasilitas }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p><em>Belum ada informasi fasilitas.</em></p>
+{% endif %}
  <a href="{% url 'hotel:booking' kamar.id %}" class="btn-booking">Booking Sekarang</a>
  <a href="{% url 'hotel:homepage' %}" class="btn-booking">Kembali</a>
  </div>

@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Kamar, Booking
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 @login_required
 def konfirmasi_pesanan(request, booking_id):
@@ -14,6 +15,13 @@ def konfirmasi_pesanan(request, booking_id):
 
 def lihat_pesanan(request):
     bookings = Booking.objects.all()  # Nanti bisa difilter per email/username
+    
+    for booking in bookings:
+        # Hitung durasi menginap dalam hari
+        durasi = (booking.check_out - booking.check_in).days
+        # Hitung total harga
+        booking.total_harga = booking.kamar.harga * durasi
+        
     return render(request, 'lihat_pesanan.html', {'bookings': bookings})
 
 @login_required
@@ -45,15 +53,28 @@ def booking(request, kamar_id):
 
         check_in = request.POST['check_in']
         check_out = request.POST['check_out']
-
+        
+        # Convert string tanggal ke objek datetime
+        check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
+        check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
+        
+        # Hitung durasi menginap
+        duration = (check_out_date - check_in_date).days
+        
+        # Hitung total harga (harga per malam * durasi)
+        total_harga = kamar.harga * duration
+        
+        # Buat booking baru
         Booking.objects.create(
             nama_pelanggan=nama_pelanggan,
             email=email,
             kamar=kamar,
-            check_in=check_in,
-            check_out=check_out,
-            status='Pending'
+            check_in=check_in_date,
+            check_out=check_out_date,
+            status='Pending',
+            total_harga=total_harga  # Masukkan total harga ke dalam booking
         )
+        
         return redirect('hotel:homepage')
 
     return render(request, 'booking.html', {'kamar': kamar})

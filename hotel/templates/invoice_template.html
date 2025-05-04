@@ -1,7 +1,58 @@
-<h1>Bukti Pemesanan</h1>
-<p>Nama: {{ booking.nama_pelanggan }}</p>
-<p>Email: {{ booking.email }}</p>
-<p>Kamar: {{ booking.kamar.nama }}</p>
-<p>Check In: {{ booking.check_in }}</p>
-<p>Check Out: {{ booking.check_out }}</p>
-<p>Status: {{ booking.status }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bukti Pemesanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-info {
+            margin-bottom: 30px;
+        }
+        .invoice-info p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .invoice-info strong {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+{% load humanize %}
+
+
+<div class="invoice-container">
+    <h1>Bukti Pemesanan</h1>
+
+    <div class="invoice-info">
+        <p>Nama: {{ booking.nama_pelanggan }}</p>
+        <p>Email: {{ booking.email }}</p>
+        <p>Kamar: {{ booking.kamar.nama }}</p>
+        <p>Check In: {{ booking.check_in }}</p>
+        <p>Check Out: {{ booking.check_out }}</p>
+        <p>Status: {{ booking.status }}</p>
+        <p><strong>Total Harga:</strong> Rp {{ booking.total_harga|floatformat:0|intcomma }}</p>
+    </div>
+</div>
+
+</body>
+</html>
