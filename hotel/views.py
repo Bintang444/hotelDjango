@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Kamar, Booking
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from django.contrib import messages  # pastikan import ini ada
+
 
 @login_required
 def konfirmasi_pesanan(request, booking_id):
@@ -49,6 +51,20 @@ def update_booking(request, booking_id):
                 messages.error(request, "Tanggal check-out harus lebih besar dari check-in.")
                 return redirect('hotel:update_booking', booking_id=booking.id)
 
+            # Handle stok
+            if kamar_baru != booking.kamar:
+                if kamar_baru.stok <= 0:
+                    messages.error(request, "Kamar baru yang dipilih sudah habis.")
+                    return redirect('hotel:update_booking', booking_id=booking.id)
+
+                # Balikin stok kamar lama
+                booking.kamar.stok += 1
+                booking.kamar.save()
+
+                # Kurangi stok kamar baru
+                kamar_baru.stok -= 1
+                kamar_baru.save()
+
             durasi = (check_out_date - check_in_date).days
             total_harga = kamar_baru.harga * durasi
 
@@ -68,14 +84,16 @@ def update_booking(request, booking_id):
     kamars = Kamar.objects.all()
     return render(request, 'update_booking.html', {'booking': booking, 'kamars': kamars})
 
-
 @login_required
 def cancel_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
 
     if booking.status == 'Pending':
         booking.status = 'Cancelled'
+        booking.kamar.stok += 1  # tambahkan stok kembali
+        booking.kamar.save()
         booking.save()
+
 
     return redirect('hotel:lihat_pesanan')  # balik ke halaman pesanan
 
@@ -83,6 +101,7 @@ def cancel_booking(request, booking_id):
 def homepage(request):
     # Ambil semua data kamar
     kamars = Kamar.objects.all()
+    kamars = Kamar.objects.filter(tersedia=True)  # Hanya yang tersedia
     return render(request, 'homepage.html', {'kamars': kamars})
 
 def detail_kamar(request, kamar_id):
@@ -92,27 +111,28 @@ def detail_kamar(request, kamar_id):
 @login_required
 def booking(request, kamar_id):
     kamar = get_object_or_404(Kamar, id=kamar_id)
+    
     if request.method == 'POST':
         nama_pelanggan = request.POST['nama_pelanggan']
-        email = request.POST['email']  # <- bagian ini bisa diganti
-        alamat = request.POST['alamat']  # Ambil alamat dari form
+        email = request.POST['email']
+        alamat = request.POST['alamat']
 
         check_in = request.POST['check_in']
         check_out = request.POST['check_out']
         
-        # Convert string tanggal ke objek datetime
         check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
         check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
-        
-        # Hitung durasi menginap
         duration = (check_out_date - check_in_date).days
-        
-        # Hitung total harga (harga per malam * durasi)
         total_harga = kamar.harga * duration
-        
-        # Buat booking baru
+
+        # ✅ Cek stok sebelum buat booking
+        if kamar.stok < 1:
+            messages.error(request, "Kamar tidak tersedia.")
+            return redirect('hotel:homepage')
+
+        # ✅ Buat booking dan kurangi stok
         Booking.objects.create(
-            user=request.user,  # Ambil user yang sedang login
+            user=request.user,
             nama_pelanggan=nama_pelanggan,
             email=email,
             alamat=alamat,
@@ -120,9 +140,13 @@ def booking(request, kamar_id):
             check_in=check_in_date,
             check_out=check_out_date,
             status='Pending',
-            total_harga=total_harga  # Masukkan total harga ke dalam booking
+            total_harga=total_harga
         )
-        
+
+        kamar.stok -= 1  # ✅ Kurangi stok
+        kamar.save()
+
+        messages.success(request, "Booking berhasil dibuat.")
         return redirect('hotel:homepage')
 
     return render(request, 'booking.html', {'kamar': kamar})

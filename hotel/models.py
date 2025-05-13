@@ -7,6 +7,8 @@ class Kamar(models.Model):
     deskripsi = models.TextField()
     fasilitas = models.TextField(blank=True, null=True)  
     gambar = models.ImageField(upload_to='kamar/', blank=True, null=True)
+    tersedia = models.BooleanField(default=True) 
+    stok = models.PositiveIntegerField(default=10)  
 
     def __str__(self):
         return self.nama
