@@ -13,16 +13,61 @@ def konfirmasi_pesanan(request, booking_id):
     pesanan.save()
     return redirect('hotel:lihat_pesanan')  # Arahkan kembali ke halaman daftar pesanan setelah mengonfirmasi
 
+@login_required
 def lihat_pesanan(request):
-    bookings = Booking.objects.all()  # Nanti bisa difilter per email/username
-    
+    if request.user.is_staff:
+        # Admin bisa lihat semua pesanan
+        bookings = Booking.objects.all()
+    else:
+        # User biasa hanya lihat pesanannya sendiri
+        bookings = Booking.objects.filter(user=request.user)
+
     for booking in bookings:
-        # Hitung durasi menginap dalam hari
         durasi = (booking.check_out - booking.check_in).days
-        # Hitung total harga
         booking.total_harga = booking.kamar.harga * durasi
-        
+
     return render(request, 'lihat_pesanan.html', {'bookings': bookings})
+
+@login_required
+def update_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    if booking.status != 'Pending':
+        return redirect('hotel:lihat_pesanan')
+
+    if request.method == 'POST':
+        kamar_id = request.POST['kamar']
+        check_in = request.POST['check_in']
+        check_out = request.POST['check_out']
+
+        try:
+            kamar_baru = Kamar.objects.get(id=kamar_id)
+            check_in_date = datetime.strptime(check_in, '%Y-%m-%d')
+            check_out_date = datetime.strptime(check_out, '%Y-%m-%d')
+
+            if check_out_date <= check_in_date:
+                messages.error(request, "Tanggal check-out harus lebih besar dari check-in.")
+                return redirect('hotel:update_booking', booking_id=booking.id)
+
+            durasi = (check_out_date - check_in_date).days
+            total_harga = kamar_baru.harga * durasi
+
+            # Update semua field
+            booking.kamar = kamar_baru
+            booking.check_in = check_in_date
+            booking.check_out = check_out_date
+            booking.total_harga = total_harga
+            booking.save()
+
+            messages.success(request, "Booking berhasil diupdate.")
+            return redirect('hotel:lihat_pesanan')
+
+        except Exception as e:
+            messages.error(request, f"Gagal update booking: {str(e)}")
+
+    kamars = Kamar.objects.all()
+    return render(request, 'update_booking.html', {'booking': booking, 'kamars': kamars})
+
 
 @login_required
 def cancel_booking(request, booking_id):
@@ -50,6 +95,7 @@ def booking(request, kamar_id):
     if request.method == 'POST':
         nama_pelanggan = request.POST['nama_pelanggan']
         email = request.POST['email']  # <- bagian ini bisa diganti
+        alamat = request.POST['alamat']  # Ambil alamat dari form
 
         check_in = request.POST['check_in']
         check_out = request.POST['check_out']
@@ -66,8 +112,10 @@ def booking(request, kamar_id):
         
         # Buat booking baru
         Booking.objects.create(
+            user=request.user,  # Ambil user yang sedang login
             nama_pelanggan=nama_pelanggan,
             email=email,
+            alamat=alamat,
             kamar=kamar,
             check_in=check_in_date,
             check_out=check_out_date,
@@ -88,19 +136,31 @@ from django.contrib import messages
 def register_view(request):
     if request.method == 'POST':
         username = request.POST['username']
+        email = request.POST['email']
         password = request.POST['password']
         password2 = request.POST['password2']
+        first_name = request.POST['first_name']  # Ambil nama depan
+        last_name = request.POST['last_name']  # Ambil nama belakang
 
-        if password == password2:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'Username sudah dipakai!')
-            else:
-                User.objects.create_user(username=username, password=password)
-                messages.success(request, 'Akun berhasil dibuat! Silakan login.')
-                return redirect('hotel:login')
-        else:
+        if password != password2:
             messages.error(request, 'Password tidak cocok!')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'Username sudah dipakai!')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, 'Email sudah terdaftar!')
+        else:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,  # Set nama depan
+                last_name=last_name,    # Set nama belakang
+            )
+            messages.success(request, 'Akun berhasil dibuat! Silakan login.')
+            return redirect('hotel:login')
+
     return render(request, 'register.html')
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -136,5 +196,3 @@ def cetak_invoice(request, booking_id):
     if pisa_status.err:
         return HttpResponse('Gagal buat PDF')
     return response
-
-

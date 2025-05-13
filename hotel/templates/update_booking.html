@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update Pesanan</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 80px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f5f7fa;
+            font-size: 16px;
+            color: #333;
+            box-sizing: border-box;
+            appearance: none;
+            /* Remove default styling */
+        }
+
+        select:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Custom arrow for the select box */
+        select::-ms-expand {
+            display: none;
+            /* Remove the default dropdown arrow in IE */
+        }
+
+        option {
+            padding: 10px;
+        }
+
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Update Pesanan</h1>
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Dropdown untuk pilih kamar -->
+            <label for="kamar">Pilih Kamar:</label>
+            <select name="kamar" id="kamar" required>
+                {% for kamar in kamars %}
+                <option value="{{ kamar.id }}" {% if kamar.id == booking.kamar.id %}selected{% endif %}>
+                    {{ kamar.nama }} - Rp{{ kamar.harga }}
+                </option>
+                {% endfor %}
+            </select><br><br>
+
+            <!-- Tanggal check-in & check-out -->
+            <input type="date" name="check_in" value="{{ booking.check_in|date:'Y-m-d' }}" required><br>
+            <input type="date" name="check_out" value="{{ booking.check_out|date:'Y-m-d' }}" required><br>
+
+            <button type="submit">Update Pesanan</button>
+        </form>
+        <a href="{% url 'hotel:lihat_pesanan' %}">Kembali ke Daftar Pesanan</a>
+    </div>
+</body>
+
+</html>

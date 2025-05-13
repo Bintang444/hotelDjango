@@ -61,7 +61,8 @@
       {% csrf_token %}
       <input type="text" name="nama_pelanggan" placeholder="Nama Lengkap" required>
       <input type="email" name="email" placeholder="Email" required>
-      <input type="text" name="alamat" placeholder="Alamat" required>
+      <label for="alamat">Alamat:</label>
+      <textarea name="alamat" placeholder="Alamat lengkap" rows="3" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;" required></textarea>
 
       <label for="check_in">Tanggal Check-in:</label>
       <input type="date" id="check_in" name="check_in" required>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Kamar(models.Model):
     nama = models.CharField(max_length=100)
@@ -16,8 +17,10 @@ class Booking(models.Model):
         ('Confirmed', 'Confirmed'),
         ('Cancelled', 'Cancelled'),
     )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     nama_pelanggan = models.CharField(max_length=100)
     email = models.EmailField()
+    alamat = models.TextField(blank=True, null=True) 
     kamar = models.ForeignKey(Kamar, on_delete=models.CASCADE)
     check_in = models.DateField()
     check_out = models.DateField()
@@ -26,3 +29,5 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.nama_pelanggan} - {self.kamar.nama}"
+    
+    
