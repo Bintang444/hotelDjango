@@ -166,6 +166,7 @@
     <div class="user-auth">
         {% if user.is_authenticated %}
             <span>Hai, {{ user.username }}!</span>
+            <a href="{% url 'hotel:edit_profile' %}" class="btn-booking">Edit Profile</a>
             <a href="{% url 'hotel:logout' %}" class="btn-booking">Logout</a>
         {% else %}
             <a href="{% url 'hotel:login' %}" class="btn-booking">Login</a>

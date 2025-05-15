@@ -151,7 +151,7 @@ def booking(request, kamar_id):
 
     return render(request, 'booking.html', {'kamar': kamar})
 
-
+from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -204,6 +204,33 @@ def logout_view(request):
     logout(request)
     return redirect('hotel:homepage')
 
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        old_password = request.POST['old_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        user = request.user
+
+        if not user.check_password(old_password):
+            messages.error(request, "Password lama salah.")
+            return redirect('edit_profile')
+
+        if new_password != confirm_password:
+            messages.error(request, "Password baru tidak cocok.")
+            return redirect('edit_profile')
+
+        user.username = username
+        user.set_password(new_password)
+        user.save()
+
+        update_session_auth_hash(request, user)  # Supaya ga auto logout
+        messages.success(request, "Akun berhasil diperbarui.")
+        return redirect('hotel:homepage')
+
+    return render(request, 'edit_profile.html')
 
 from django.http import HttpResponse
 from django.template.loader import get_template

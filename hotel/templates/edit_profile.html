@@ -1,0 +1,107 @@
+<style>
+  .form-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+
+  .form-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: #3b82f6;
+    outline: none;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #2563eb;
+  }
+
+  .back-btn {
+    display: block;
+    text-align: center;
+    margin-top: 30px;
+    text-decoration: none;
+    color: white;
+    background-color: #007BFF;
+    padding: 10px 20px;
+    border-radius: 5px;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .back-btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="form-container">
+  <h2>Ganti Username Atau Password</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label>Username Baru atau yang sebelumnya:</label>
+    <input type="text" name="username" required>
+
+    <label>Password Lama:</label>
+    <input type="password" name="old_password" required>
+
+    <label>Password Baru:</label>
+    <input type="password" name="new_password" required>
+
+    <label>Konfirmasi Password Baru:</label>
+    <input type="password" name="confirm_password" required>
+
+    <button type="submit">Update</button>
+  </form>
+  <!-- Menampilkan pesan jika ada -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+  <a href="{% url 'hotel:homepage' %}" class="back-btn">Kembali ke Beranda</a>
+</div>
