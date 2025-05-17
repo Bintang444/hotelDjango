@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Pesanan Saya</title>
@@ -10,29 +11,34 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 30px;
         }
+
         ul {
             max-width: 600px;
             margin: 0 auto;
             list-style: none;
             padding: 0;
         }
+
         li {
             background-color: #fff;
             margin-bottom: 20px;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             line-height: 1.6;
             position: relative;
         }
+
         strong {
             color: #007BFF;
         }
+
         a.btn {
             display: inline-block;
             margin-top: 10px;
@@ -42,9 +48,11 @@
             padding: 8px 15px;
             border-radius: 5px;
         }
+
         a.btn:hover {
             background-color: #c82333;
         }
+
         .back-btn {
             display: block;
             text-align: center;
@@ -58,51 +66,67 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         .back-btn:hover {
             background-color: #0056b3;
         }
+
         p {
             text-align: center;
             color: #666;
         }
     </style>
 </head>
+
 <body>
-{% load humanize %}
+    {% load humanize %}
 
-<h1>Pesanan Saya</h1>
+    <h1>Pesanan Saya</h1>
 
-{% if bookings %}
+    {% if bookings %}
     <ul>
         {% for booking in bookings %}
-    <li>
-        <strong>Nama:</strong> {{ booking.user.get_full_name|default:booking.user.username }} <br>
-        <strong>Email:</strong> {{ booking.user.email }} <br>
-        <strong>Alamat:</strong> {{ booking.alamat }} <br>
-        <strong>Kamar:</strong> {{ booking.kamar.nama }} <br>
-        <strong>Check-in:</strong> {{ booking.check_in }} <br>
-        <strong>Check-out:</strong> {{ booking.check_out }} <br>
-        <strong>Total Harga:</strong> Rp {{ booking.total_harga|floatformat:0|intcomma }} <br>
-        <strong>Status:</strong> {{ booking.status }} <br>
+        <li>
+            <strong>Nama:</strong> {{ booking.user.get_full_name|default:booking.user.username }} <br>
+            <strong>Email:</strong> {{ booking.user.email }} <br>
+            <strong>Alamat:</strong> {{ booking.alamat }} <br>
+            <strong>Kamar:</strong> {{ booking.kamar.nama }} <br>
+            <strong>Check-in:</strong> {{ booking.check_in }} <br>
+            <strong>Check-out:</strong> {{ booking.check_out }} <br>
+            <strong>Total Harga:</strong> Rp {{ booking.total_harga|floatformat:0|intcomma }} <br>
+            <strong>Metode Pembayaran:</strong> {{ booking.metode_pembayaran|default:"-" }} <br>
+            <strong>Status:</strong> {{ booking.status }} <br>
 
-        {% if booking.status == "Pending" %}
-            <a href="{% url 'hotel:cancel_booking' booking.id %}" class="btn" onclick="return confirm('Yakin mau batalkan booking?')">Batalkan</a>
-            <a href="{% url 'hotel:update_booking' booking.id %}" class="btn" style="background-color: #2855a7;">Edit Pesanan</a>
-        {% endif %}
+            {% if booking.status != "Cancelled" %}
+            {% if booking.bukti_pembayaran %}
+            <a href="{{ booking.bukti_pembayaran.url }}" target="_blank" class="btn" style="background-color: #6c757d;">Lihat Bukti</a>
+            {% else %}
+            <a href="{% url 'hotel:upload_bukti' booking.id %}" class="btn" style="background-color: #17a2b8;">Upload Bukti</a>
+            {% endif %}
+            {% endif %}
 
-        {% if booking.status == "Confirmed" %}
-            <a href="{% url 'hotel:invoice' booking.id %}" class="btn" style="background-color: #28a745;">Cetak Bukti (PDF)</a>
-        {% endif %}
-    </li>
-{% endfor %}
+            {% if booking.status == "Pending" %}
+            <a href="{% url 'hotel:cancel_booking' booking.id %}" class="btn"
+                onclick="return confirm('Yakin mau batalkan booking?')">Batalkan</a>
+            <a href="{% url 'hotel:update_booking' booking.id %}" class="btn" style="background-color: #2855a7;">Edit
+                Pesanan</a>
+            {% endif %}
+
+            {% if booking.status == "Confirmed" %}
+            <a href="{% url 'hotel:invoice' booking.id %}" class="btn" style="background-color: #28a745;">Cetak Bukti
+                (PDF)</a>
+            {% endif %}
+        </li>
+        {% endfor %}
 
 
     </ul>
-{% else %}
+    {% else %}
     <p>Belum ada pesanan.</p>
-{% endif %}
+    {% endif %}
 
-<a href="{% url 'hotel:homepage' %}" class="back-btn">Kembali ke Beranda</a>
+    <a href="{% url 'hotel:homepage' %}" class="back-btn">Kembali ke Beranda</a>
 
 </body>
+
 </html>

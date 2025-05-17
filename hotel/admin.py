@@ -8,8 +8,10 @@ class KamarAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('nama_pelanggan', 'kamar', 'status', 'check_in', 'check_out')
-    search_fields = ('nama_pelanggan', 'email', 'kamar__nama', 'status')  # search bar by nama, email, kamar, status
+    readonly_fields = ('user', 'nama_pelanggan', 'email', 'alamat', 'kamar', 'check_in', 'check_out', 'total_harga', 'metode_pembayaran', 'bukti_pembayaran')
+    list_display = ('nama_pelanggan', 'kamar', 'status', 'check_in', 'check_out', 'metode_pembayaran', 'bukti_pembayaran')
+    list_filter = ('status', 'metode_pembayaran')
+    search_fields = ('nama_pelanggan', 'email', 'kamar__nama', 'status')  # search bar nama, email, kamar, status
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -22,4 +24,3 @@ class BookingAdmin(admin.ModelAdmin):
                 )
                 return
         super().save_model(request, obj, form, change)
-

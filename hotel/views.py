@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Kamar, Booking
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
-from django.contrib import messages  # pastikan import ini ada
-
+from django.contrib import messages 
+from django.core.files.storage import FileSystemStorage  # kalau pakai default storage
 
 @login_required
 def konfirmasi_pesanan(request, booking_id):
@@ -125,12 +125,12 @@ def booking(request, kamar_id):
         duration = (check_out_date - check_in_date).days
         total_harga = kamar.harga * duration
 
-        # ✅ Cek stok sebelum buat booking
+        # Cek stok sebelum buat booking
         if kamar.stok < 1:
             messages.error(request, "Kamar tidak tersedia.")
             return redirect('hotel:homepage')
 
-        # ✅ Buat booking dan kurangi stok
+        # Buat booking dan kurangi stok
         Booking.objects.create(
             user=request.user,
             nama_pelanggan=nama_pelanggan,
@@ -142,14 +142,37 @@ def booking(request, kamar_id):
             status='Pending',
             total_harga=total_harga
         )
+        
+        if not nama_pelanggan or not email:
+            messages.error(request, "Nama dan email wajib diisi.")
+            return redirect('hotel:booking', kamar_id=kamar.id)
 
-        kamar.stok -= 1  # ✅ Kurangi stok
+        kamar.stok -= 1  # Kurangi stok
         kamar.save()
 
         messages.success(request, "Booking berhasil dibuat.")
         return redirect('hotel:homepage')
 
     return render(request, 'booking.html', {'kamar': kamar})
+
+@login_required
+def upload_bukti_pembayaran(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == 'POST':
+        bukti = request.FILES.get('bukti_pembayaran')
+        metode = request.POST.get('metode_pembayaran')
+
+        if bukti and metode:
+            booking.bukti_pembayaran = bukti
+            booking.metode_pembayaran = metode
+            booking.save()
+            messages.success(request, 'Bukti pembayaran berhasil diupload.')
+            return redirect('hotel:lihat_pesanan')
+        else:
+            messages.error(request, 'Lengkapi bukti dan metode pembayaran.')
+
+    return render(request, 'upload_bukti.html', {'booking': booking})
 
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect
@@ -238,7 +261,7 @@ from xhtml2pdf import pisa # type: ignore
 
 def cetak_invoice(request, booking_id):
     from hotel.models import Booking  # atau sesuaikan
-    booking = Booking.objects.get(id=booking_id)
+    booking = get_object_or_404(Booking, id=booking_id)
     template = get_template('invoice_template.html')
     html = template.render({'booking': booking})
     response = HttpResponse(content_type='application/pdf')

@@ -19,6 +19,12 @@ class Booking(models.Model):
         ('Confirmed', 'Confirmed'),
         ('Cancelled', 'Cancelled'),
     )
+    
+    METODE_PEMBAYARAN = (
+        ('E-Wallet', 'E-Wallet'),
+        ('VA-BANK', 'VA Bank'),
+    )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     nama_pelanggan = models.CharField(max_length=100)
     email = models.EmailField()
@@ -26,10 +32,12 @@ class Booking(models.Model):
     kamar = models.ForeignKey(Kamar, on_delete=models.CASCADE)
     check_in = models.DateField()
     check_out = models.DateField()
+    total_harga = models.IntegerField()
+    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
-    total_harga = models.IntegerField()  # Field untuk total harga
+    
+    metode_pembayaran = models.CharField(max_length=20, choices=METODE_PEMBAYARAN, blank=True, null=True)
+    bukti_pembayaran = models.ImageField(upload_to='bukti_pembayaran/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.nama_pelanggan} - {self.kamar.nama}"
-    
-    

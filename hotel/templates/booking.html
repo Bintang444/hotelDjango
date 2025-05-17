@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +21,8 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    input, button {
+    input,
+    button {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
@@ -35,34 +37,38 @@
     }
 
     .btn-booking {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 15px;
-            background: #4caf50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-            cursor: pointer;
-        }
-        
-        .btn-booking:hover {
-            background: #45a049;
-        }
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: #4caf50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-booking:hover {
+      background: #45a049;
+    }
   </style>
 </head>
+
 <body>
-    {% load humanize %}
+  {% load humanize %}
   <div class="container">
     <h2>Booking Kamar: {{ kamar.nama }}</h2>
     <p>Harga per malam: <strong>Rp{{ kamar.harga|intcomma }}</strong></p>
 
     <form method="POST">
       {% csrf_token %}
-      <input type="text" name="nama_pelanggan" placeholder="Nama Lengkap" required>
+      <input type="text" name="nama_pelanggan" value="{{ request.user.get_full_name|default:request.user.username }}"
+        readonly style="background-color: #e9ecef; cursor: not-allowed;">
       <input type="email" name="email" placeholder="Email" required>
       <label for="alamat">Alamat:</label>
-      <textarea name="alamat" placeholder="Alamat lengkap" rows="3" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;" required></textarea>
+      <textarea name="alamat" placeholder="Alamat lengkap" rows="3"
+        style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;"
+        required></textarea>
 
       <label for="check_in">Tanggal Check-in:</label>
       <input type="date" id="check_in" name="check_in" required>
@@ -109,4 +115,5 @@
     checkOut.addEventListener('change', hitungTotal);
   </script>
 </body>
+
 </html>

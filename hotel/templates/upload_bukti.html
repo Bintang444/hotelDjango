@@ -1,0 +1,92 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        padding: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    form {
+        background-color: #fff;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #444;
+    }
+
+    select,
+    input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    button {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .messages {
+        max-width: 400px;
+        margin: 20px auto;
+    }
+
+    .message {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .message.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+
+<h2>Upload Bukti Pembayaran</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <label for="metode_pembayaran">Metode Pembayaran:</label>
+    <select name="metode_pembayaran" required>
+        <option value="">--Pilih Metode--</option>
+        <option value="E-Wallet">E-Wallet</option>
+        <option value="VA-BANK">VA BANK</option>
+    </select><br><br>
+
+    <label for="bukti_pembayaran">Upload Bukti:</label>
+    <input type="file" name="bukti_pembayaran" required><br><br>
+
+    <button type="submit">Upload</button>
+</form>
